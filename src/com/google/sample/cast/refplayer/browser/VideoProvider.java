@@ -117,7 +117,19 @@ public class VideoProvider {
                         String bigImageurl = getThumbPrefix() + video.getString(TAG_IMG_780_1200);
                         String title = video.getString(TAG_TITLE);
                         String studio = video.getString(TAG_STUDIO);
-                        String custom = video.getString(TAG_CUSTOM);
+
+                        //String test = video.getString(TAG_CUSTOM);
+
+                        JSONObject custom = null;
+                        if (video.has(TAG_CUSTOM)) {
+                          JSONArray customArray = video.getJSONArray(TAG_CUSTOM);
+                          if (null != customArray && customArray.length() == 1) {
+                            custom = customArray.getJSONObject(0);
+                          }
+                        }
+
+                      
+                        //JSONObject custom = video.getJSONObject(TAG_CUSTOM);
                         List<MediaTrack> tracks = null;
                         if (video.has(TAG_TRACKS)) {
                             JSONArray tracksArray = video.getJSONArray(TAG_TRACKS);
@@ -146,7 +158,7 @@ public class VideoProvider {
     }
 
     private static MediaInfo buildMediaInfo(String title, String subTitle, String studio,
-            String url, String imgUrl, String bigImageUrl, List<MediaTrack> tracks, String custom) throws JSONException {
+            String url, String imgUrl, String bigImageUrl, List<MediaTrack> tracks, JSONObject custom) throws JSONException {
         MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
 
         movieMetadata.putString(MediaMetadata.KEY_SUBTITLE, subTitle);
@@ -155,13 +167,24 @@ public class VideoProvider {
         movieMetadata.addImage(new WebImage(Uri.parse(imgUrl)));
         movieMetadata.addImage(new WebImage(Uri.parse(bigImageUrl)));
 
-        return new MediaInfo.Builder(url)
-                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
-                .setContentType(getMediaType())
-                .setMetadata(movieMetadata)
-                .setCustomData(new JSONObject(custom))
-                .setMediaTracks(tracks)
-                .build();
+        if(custom == null) {
+          return new MediaInfo.Builder(url)
+                  .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+                  .setContentType(getMediaType())
+                  .setMetadata(movieMetadata)
+                  .setMediaTracks(tracks)
+                  .build();
+
+        } else {
+          return new MediaInfo.Builder(url)
+                  .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+                  .setContentType(getMediaType())
+                  .setMetadata(movieMetadata)
+                  .setCustomData(custom)
+                  .setMediaTracks(tracks)
+                  .build();
+
+        }
     }
 
     private static MediaTrack buildTrack(long id, String type, String subType, String contentId,
