@@ -58,6 +58,7 @@ public class VideoProvider {
     private static String TAG_THUMB = "image-480x270"; // "thumb";
     private static String TAG_IMG_780_1200 = "image-780x1200";
     private static String TAG_TITLE = "title";
+    private static String TAG_CUSTOM = "custom";
 
     private static List<MediaInfo> mediaList;
 
@@ -116,6 +117,7 @@ public class VideoProvider {
                         String bigImageurl = getThumbPrefix() + video.getString(TAG_IMG_780_1200);
                         String title = video.getString(TAG_TITLE);
                         String studio = video.getString(TAG_STUDIO);
+                        String custom = video.getString(TAG_CUSTOM);
                         List<MediaTrack> tracks = null;
                         if (video.has(TAG_TRACKS)) {
                             JSONArray tracksArray = video.getJSONArray(TAG_TRACKS);
@@ -135,7 +137,7 @@ public class VideoProvider {
                         }
 
                         mediaList.add(buildMediaInfo(title, studio, subTitle, videoUrl, imageurl,
-                                bigImageurl, tracks));
+                                bigImageurl, tracks, custom));
                     }
                 }
             }
@@ -144,7 +146,7 @@ public class VideoProvider {
     }
 
     private static MediaInfo buildMediaInfo(String title, String subTitle, String studio,
-            String url, String imgUrl, String bigImageUrl, List<MediaTrack> tracks) {
+            String url, String imgUrl, String bigImageUrl, List<MediaTrack> tracks, String custom) throws JSONException {
         MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
 
         movieMetadata.putString(MediaMetadata.KEY_SUBTITLE, subTitle);
@@ -157,6 +159,7 @@ public class VideoProvider {
                 .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
                 .setContentType(getMediaType())
                 .setMetadata(movieMetadata)
+                .setCustomData(new JSONObject(custom))
                 .setMediaTracks(tracks)
                 .build();
     }
